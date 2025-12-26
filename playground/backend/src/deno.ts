@@ -1,22 +1,35 @@
 import { Hocuspocus } from "@hocuspocus/server";
-import { upgradeWebSocket } from "hono/deno";
+import { Logger } from "@hocuspocus/extension-logger";
 
 const hocuspocus = new Hocuspocus({
-	name: "collaboration",
+	name: "hocuspocus-deno",
+	extensions: [
+		// Logger is runtime-agnostic and works on Deno
+		new Logger(),
+	],
 });
 
-// @ts-ignore
-Deno.serve((req) => {
-	if (req.headers.get("upgrade") !== "websocket") {
-		return new Response(null, { status: 501 });
+// @ts-ignore - Deno types
+Deno.serve({ port: 8000 }, (req) => {
+	const upgradeHeader = req.headers.get("upgrade");
+
+	if (upgradeHeader !== "websocket") {
+		return new Response("Hocuspocus on Deno! Use WebSocket to connect.", {
+			status: 200,
+			headers: { "Content-Type": "text/plain" },
+		});
 	}
 
+	// @ts-ignore - Deno WebSocket API
 	const { socket, response } = Deno.upgradeWebSocket(req);
 
 	// @ts-ignore
 	socket.addEventListener("open", (_event) => {
+		// @ts-ignore
 		hocuspocus.handleConnection(socket, req);
 	});
 
 	return response;
 });
+
+console.log("Hocuspocus server is running on Deno at ws://127.0.0.1:8000");

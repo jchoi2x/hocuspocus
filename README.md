@@ -1,6 +1,8 @@
 # Hocuspocus
 A plug & play collaboration backend based on [Y.js](https://github.com/yjs/yjs).
 
+**🚀 Runtime Agnostic** - Works on Node.js, Deno, Bun, and Cloudflare Workers
+
 [![Build Status](https://github.com/ueberdosis/hocuspocus/workflows/build/badge.svg)](https://github.com/ueberdosis/hocuspocus/actions)
 [![Version](https://img.shields.io/npm/v/@hocuspocus/server.svg?label=version)](https://www.npmjs.com/package/@hocuspocus/server)
 [![Downloads](https://img.shields.io/npm/dm/@hocuspocus/server.svg)](https://npmcharts.com/compare/@hocuspocus/server?minimal=true)
@@ -20,7 +22,9 @@ You want to use Hocuspocus, but don't want to care about hosting? Check our [Clo
 Send all your questions, feedback and bug reports to [humans@tiptap.dev](mailto:humans@tiptap.dev) or [create an issue](https://github.com/ueberdosis/hocuspocus/issues/new/choose) here.
 
 ## Usage
-The following example is a example setup you need to start a WebSocket server. By default, it’s listening on [http://127.0.0.1](http://127.0.0.1) (or prefixed with the WebSocket protocol on ws://127.0.0.1):
+
+### Node.js (Standalone)
+The following example shows how to start a WebSocket server on Node.js. By default, it's listening on [http://127.0.0.1](http://127.0.0.1) (or prefixed with the WebSocket protocol on ws://127.0.0.1):
 
 ```js
 import { Server } from '@hocuspocus/server'
@@ -43,6 +47,77 @@ const server = new Server({
 server.listen();
 ```
 
+### Multi-Runtime Support 🚀
+
+Hocuspocus works across **Node.js, Deno, Bun, and Cloudflare Workers**. For runtime-agnostic usage:
+
+```js
+import { Hocuspocus } from '@hocuspocus/server'
+
+const hocuspocus = new Hocuspocus({
+  async onConnect() {
+    console.log('🔮')
+  },
+})
+
+// Integrate with your runtime's HTTP/WebSocket server
+// See RUNTIMES.md for detailed examples for each runtime
+```
+
+**📚 [View detailed runtime examples →](./RUNTIMES.md)**
+
+<details>
+<summary><strong>Quick Examples by Runtime</strong></summary>
+
+#### Deno
+```typescript
+import { Hocuspocus } from '@hocuspocus/server'
+
+const hocuspocus = new Hocuspocus()
+
+Deno.serve((req) => {
+  const { socket, response } = Deno.upgradeWebSocket(req)
+  socket.addEventListener('open', () => {
+    hocuspocus.handleConnection(socket, req)
+  })
+  return response
+})
+```
+
+#### Bun
+```typescript
+import { Hocuspocus } from '@hocuspocus/server'
+
+const hocuspocus = new Hocuspocus()
+
+Bun.serve({
+  websocket: {
+    open(ws) {
+      hocuspocus.handleConnection(ws, ws.data.req)
+    }
+  }
+})
+```
+
+#### Cloudflare Workers
+```typescript
+import { Hocuspocus } from '@hocuspocus/server'
+
+export default {
+  async fetch(request) {
+    const hocuspocus = new Hocuspocus()
+    const pair = new WebSocketPair()
+    const [client, server] = Object.values(pair)
+    
+    server.accept()
+    hocuspocus.handleConnection(server, request)
+    
+    return new Response(null, { status: 101, webSocket: client })
+  }
+}
+```
+
+</details>
 ## Community
 For help, discussion about best practices, or any other conversation:
 

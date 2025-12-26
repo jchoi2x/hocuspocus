@@ -7,7 +7,15 @@
 		"hocuspocus",
 		"yjs",
 		"yjs-websocket",
-		"prosemirror"
+		"prosemirror",
+		"collaboration",
+		"crdt",
+		"runtime-agnostic",
+		"nodejs",
+		"deno",
+		"bun",
+		"cloudflare-workers",
+		"websocket"
 	],
 	"license": "MIT",
 	"type": "module",
