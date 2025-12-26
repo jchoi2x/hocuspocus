@@ -31,6 +31,7 @@
 		"lint:fix": "biome lint --fix",
 		"test": "ava",
 		"test:watch": "ava --watch",
+		"test:runtime-agnostic": "node test-runtime-agnostic.cjs",
 		"build:packages": "npm run clean:packages && rollup -c",
 		"build:watch": "npm run clean:packages && rollup -wc",
 		"clean:packages": "rm -Rf ./packages/*/dist",
