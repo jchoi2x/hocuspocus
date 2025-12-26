@@ -1,6 +1,3 @@
-import crypto from "node:crypto";
-import type { IncomingHttpHeaders, IncomingMessage } from "node:http";
-import type { URLSearchParams } from "node:url";
 import {
 	type CloseEvent,
 	ConnectionTimeout,
@@ -16,6 +13,11 @@ import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
 import { IncomingMessage as SocketIncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
+import {
+	type RuntimeCrypto,
+	type RuntimeRequest,
+	defaultRuntimeCrypto,
+} from "./runtime.ts";
 import type {
 	ConnectionConfiguration,
 	beforeHandleMessagePayload,
@@ -61,7 +63,7 @@ export class ClientConnection {
 	};
 
 	// Every new connection gets a unique identifier.
-	private readonly socketId = crypto.randomUUID();
+	private readonly socketId = defaultRuntimeCrypto.randomUUID();
 
 	timeout: number;
 

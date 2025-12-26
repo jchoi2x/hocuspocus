@@ -82,18 +82,30 @@ const hocuspocus = new Hocuspocus()
 
 ## Testing Your Runtime Compatibility
 
-### 1. Check for Node.js-specific imports
+### 1. Use the correct import path
+```typescript
+// ❌ Not runtime-agnostic (includes Node.js Server class)
+import { Hocuspocus } from '@hocuspocus/server'
+
+// ✅ Runtime-agnostic core only
+import { Hocuspocus } from '@hocuspocus/server/core'
+
+// ✅ Explicit Node.js (includes Server class)
+import { Server } from '@hocuspocus/server/node'
+```
+
+### 2. Check for Node.js-specific imports
 ```typescript
 // ❌ Not runtime-agnostic
 import fs from 'node:fs'
-import { Server } from '@hocuspocus/server'
+import crypto from 'node:crypto'
 
-// ✅ Runtime-agnostic
-import { Hocuspocus } from '@hocuspocus/server'
+// ✅ Runtime-agnostic (uses Web Standards)
+import { defaultRuntimeCrypto } from '@hocuspocus/server/runtime'
 // Use Web APIs (fetch, crypto.subtle, etc.)
 ```
 
-### 2. Use runtime-agnostic extensions
+### 3. Use runtime-agnostic extensions
 ```typescript
 // ✅ Works everywhere
 import { Logger } from '@hocuspocus/extension-logger'
@@ -104,7 +116,7 @@ import { SQLite } from '@hocuspocus/extension-sqlite'
 import { Redis } from '@hocuspocus/extension-redis'
 ```
 
-### 3. Test on multiple runtimes
+### 4. Test on multiple runtimes
 ```bash
 # Node.js
 node src/server.ts

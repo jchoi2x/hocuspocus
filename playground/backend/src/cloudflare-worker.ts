@@ -9,7 +9,7 @@
  * Note: This example uses Cloudflare's WebSocket API
  */
 
-import { Hocuspocus } from "@hocuspocus/server";
+import { Hocuspocus } from "@hocuspocus/server/core";
 
 export default {
 	async fetch(request: Request, env: any, ctx: any): Promise<Response> {

@@ -2,12 +2,31 @@
 
 Hocuspocus is **runtime agnostic** and works seamlessly across multiple JavaScript runtimes including Node.js, Deno, Bun, and Cloudflare Workers.
 
+## Import Paths
+
+Hocuspocus now provides multiple import paths for different use cases:
+
+```typescript
+// Default: Everything (backward compatible, includes Node.js Server class)
+import { Hocuspocus, Server } from '@hocuspocus/server'
+
+// Core: Runtime-agnostic core only (recommended for non-Node.js runtimes)
+import { Hocuspocus } from '@hocuspocus/server/core'
+
+// Node: Everything including Node.js Server class (explicit Node.js usage)
+import { Hocuspocus, Server } from '@hocuspocus/server/node'
+
+// Runtime: Just the runtime abstraction utilities
+import { defaultRuntimeCrypto } from '@hocuspocus/server/runtime'
+```
+
 ## Architecture
 
 Hocuspocus follows a similar approach to [Hono](https://hono.dev) with a runtime-agnostic core:
 
-- **`Hocuspocus` class**: Runtime-agnostic collaboration engine
+- **`Hocuspocus` class**: Runtime-agnostic collaboration engine (no Node.js dependencies)
 - **`Server` class**: Node.js-specific convenience wrapper (optional)
+- **Runtime abstraction**: Web Standards-based APIs that work across all runtimes
 
 ## Quick Start by Runtime
 
@@ -68,7 +87,7 @@ injectWebSocket(server)
 ### Deno
 
 ```typescript
-import { Hocuspocus } from '@hocuspocus/server'
+import { Hocuspocus } from '@hocuspocus/server/core'
 
 const hocuspocus = new Hocuspocus()
 
@@ -90,7 +109,7 @@ Deno.serve((req) => {
 ### Bun
 
 ```typescript
-import { Hocuspocus } from '@hocuspocus/server'
+import { Hocuspocus } from '@hocuspocus/server/core'
 
 const hocuspocus = new Hocuspocus()
 
@@ -117,7 +136,7 @@ Bun.serve({
 ### Cloudflare Workers
 
 ```typescript
-import { Hocuspocus } from '@hocuspocus/server'
+import { Hocuspocus } from '@hocuspocus/server/core'
 
 export default {
   async fetch(request, env) {
@@ -146,7 +165,7 @@ export default {
 Hono works across all runtimes. Here's a runtime-agnostic example:
 
 ```typescript
-import { Hocuspocus } from '@hocuspocus/server'
+import { Hocuspocus } from '@hocuspocus/server/core'
 import { Hono } from 'hono'
 
 const hocuspocus = new Hocuspocus()

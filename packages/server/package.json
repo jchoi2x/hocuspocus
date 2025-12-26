@@ -23,13 +23,33 @@
 	"module": "dist/hocuspocus-server.esm.js",
 	"types": "dist/packages/server/src/index.d.ts",
 	"exports": {
-		"source": {
-			"import": "./src/index.ts"
-		},
-		"default": {
+		".": {
+			"source": "./src/index.ts",
+			"types": "./dist/packages/server/src/index.d.ts",
 			"import": "./dist/hocuspocus-server.esm.js",
-			"require": "./dist/hocuspocus-server.cjs",
-			"types": "./dist/packages/server/src/index.d.ts"
+			"require": "./dist/hocuspocus-server.cjs"
+		},
+		"./core": {
+			"source": "./src/core.ts",
+			"types": "./src/core.ts",
+			"default": "./src/core.ts"
+		},
+		"./node": {
+			"source": "./src/node.ts",
+			"types": "./src/node.ts",
+			"default": "./src/node.ts"
+		},
+		"./runtime": {
+			"source": "./src/runtime.ts",
+			"types": "./src/runtime.ts",
+			"default": "./src/runtime.ts"
+		}
+	},
+	"typesVersions": {
+		"*": {
+			"core": ["./src/core.ts"],
+			"node": ["./src/node.ts"],
+			"runtime": ["./src/runtime.ts"]
 		}
 	},
 	"files": [

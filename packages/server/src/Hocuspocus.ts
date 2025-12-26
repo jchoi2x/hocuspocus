@@ -1,5 +1,3 @@
-import crypto from "node:crypto";
-import type { IncomingMessage } from "node:http";
 import { ResetConnection, awarenessStatesToArray } from "@hocuspocus/common";
 import type WebSocket from "ws";
 import type { Doc } from "yjs";
@@ -9,6 +7,11 @@ import { ClientConnection } from "./ClientConnection.ts";
 import type Connection from "./Connection.ts";
 import { DirectConnection } from "./DirectConnection.ts";
 import Document from "./Document.ts";
+import {
+	type RuntimeCrypto,
+	type RuntimeRequest,
+	defaultRuntimeCrypto,
+} from "./runtime.ts";
 import type { Server } from "./Server.ts";
 import type {
 	AwarenessUpdate,
@@ -67,6 +70,8 @@ export class Hocuspocus {
 	documents: Map<string, Document> = new Map();
 
 	server?: Server;
+
+	runtime: RuntimeCrypto = defaultRuntimeCrypto;
 
 	debouncer = useDebounce();
 
@@ -551,7 +556,7 @@ export class Hocuspocus {
 		const document: Document = await this.createDocument(
 			documentName,
 			{}, // direct connection has no request params
-			crypto.randomUUID(),
+			this.runtime.randomUUID(),
 			connectionConfig,
 			context,
 		);

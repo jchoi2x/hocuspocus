@@ -52,7 +52,8 @@ server.listen();
 Hocuspocus works across **Node.js, Deno, Bun, and Cloudflare Workers**. For runtime-agnostic usage:
 
 ```js
-import { Hocuspocus } from '@hocuspocus/server'
+// Use the runtime-agnostic core for non-Node.js runtimes
+import { Hocuspocus } from '@hocuspocus/server/core'
 
 const hocuspocus = new Hocuspocus({
   async onConnect() {
@@ -71,7 +72,7 @@ const hocuspocus = new Hocuspocus({
 
 #### Deno
 ```typescript
-import { Hocuspocus } from '@hocuspocus/server'
+import { Hocuspocus } from '@hocuspocus/server/core'
 
 const hocuspocus = new Hocuspocus()
 
@@ -86,7 +87,7 @@ Deno.serve((req) => {
 
 #### Bun
 ```typescript
-import { Hocuspocus } from '@hocuspocus/server'
+import { Hocuspocus } from '@hocuspocus/server/core'
 
 const hocuspocus = new Hocuspocus()
 
@@ -101,7 +102,7 @@ Bun.serve({
 
 #### Cloudflare Workers
 ```typescript
-import { Hocuspocus } from '@hocuspocus/server'
+import { Hocuspocus } from '@hocuspocus/server/core'
 
 export default {
   async fetch(request) {

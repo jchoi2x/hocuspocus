@@ -1,4 +1,4 @@
-import { Hocuspocus } from "@hocuspocus/server";
+import { Hocuspocus } from "@hocuspocus/server/core";
 import { Logger } from "@hocuspocus/extension-logger";
 
 const hocuspocus = new Hocuspocus({
