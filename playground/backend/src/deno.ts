@@ -14,7 +14,8 @@ Deno.serve({ port: 8000 }, (req) => {
 	const upgradeHeader = req.headers.get("upgrade");
 
 	if (upgradeHeader !== "websocket") {
-		return new Response("Hocuspocus on Deno! Use WebSocket to connect.", {
+		const message = "Hocuspocus on Deno! Use WebSocket to connect.";
+		return new Response(message, {
 			status: 200,
 			headers: { "Content-Type": "text/plain" },
 		});

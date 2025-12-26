@@ -41,7 +41,7 @@ Bun.serve({
 		message(_ws, _message) {
 			// Messages are handled internally by Hocuspocus via event listeners
 		},
-		close(ws) {
+		close(_ws) {
 			// Close is handled by Hocuspocus
 		},
 	},

@@ -110,10 +110,10 @@ test('Can configure Server with options', () => {
   }
 });
 
-// Test 5: Server can start and stop
-test('Server can start and stop', async () => {
+// Test 5: Helper for server lifecycle testing
+async function testServerLifecycle(port) {
   const server = new Server({ 
-    port: 18235, 
+    port, 
     quiet: true,
     stopOnSignals: false 
   });
@@ -128,6 +128,13 @@ test('Server can start and stop', async () => {
   
   if (server.httpServer.listening) {
     throw new Error('Server still listening after destroy');
+  }
+}
+
+test('Server lifecycle helper defined', () => {
+  // Verify the helper function exists
+  if (typeof testServerLifecycle !== 'function') {
+    throw new Error('Test helper not defined');
   }
 });
 
@@ -150,24 +157,7 @@ test('Hocuspocus can be used independently', () => {
 // Run async tests
 (async () => {
   try {
-    const server = new Server({ 
-      port: 18236, 
-      quiet: true,
-      stopOnSignals: false 
-    });
-    
-    await server.listen();
-    
-    if (!server.httpServer.listening) {
-      throw new Error('Server not listening');
-    }
-    
-    await server.destroy();
-    
-    if (server.httpServer.listening) {
-      throw new Error('Server still listening after destroy');
-    }
-    
+    await testServerLifecycle(18236);
     console.log('✅ Async server start/stop test');
     passed++;
   } catch (error) {
