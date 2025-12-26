@@ -26,6 +26,11 @@ Send all your questions, feedback and bug reports to [humans@tiptap.dev](mailto:
 ### Node.js (Standalone)
 The following example shows how to start a WebSocket server on Node.js. By default, it's listening on [http://127.0.0.1](http://127.0.0.1) (or prefixed with the WebSocket protocol on ws://127.0.0.1):
 
+**Note:** Install the `ws` package separately for Node.js Server class:
+```bash
+npm install ws @hocuspocus/server
+```
+
 ```js
 import { Server } from '@hocuspocus/server'
 import { SQLite } from '@hocuspocus/extension-sqlite'

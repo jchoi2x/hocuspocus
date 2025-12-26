@@ -28,9 +28,14 @@ const server = new Server({ port: 1234 })
 server.listen()
 ```
 
+**Note:** The Node.js `Server` class requires the `ws` package. Install it separately:
+```bash
+npm install ws
+```
+
 #### Runtime-Agnostic (Deno, Bun, CF Workers)
 ```typescript
-import { Hocuspocus } from '@hocuspocus/server'
+import { Hocuspocus } from '@hocuspocus/server/core'
 
 const hocuspocus = new Hocuspocus()
 // Integrate with your runtime's WebSocket implementation

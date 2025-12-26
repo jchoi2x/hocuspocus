@@ -34,6 +34,13 @@ Hocuspocus follows a similar approach to [Hono](https://hono.dev) with a runtime
 
 #### Using the Server class (recommended for standalone)
 
+**Installation:**
+```bash
+npm install ws @hocuspocus/server
+```
+
+**Note:** The `ws` package is required for the Node.js `Server` class but is not automatically installed. Install it separately.
+
 ```typescript
 import { Server } from '@hocuspocus/server'
 
