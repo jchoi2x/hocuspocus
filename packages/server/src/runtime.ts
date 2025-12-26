@@ -8,6 +8,32 @@ export interface RuntimeCrypto {
 	randomUUID(): string;
 }
 
+// WebSocket interface compatible with Web Standards and ws package
+export interface RuntimeWebSocket {
+	// Properties
+	readyState: number;
+	binaryType?: string;
+
+	// Methods
+	send(data: ArrayBuffer | Uint8Array | string, callback?: (error?: Error) => void): void;
+	close(code?: number, reason?: string): void;
+	
+	// Event handlers (Web Standards style)
+	addEventListener?(type: string, listener: (event: any) => void): void;
+	removeEventListener?(type: string, listener: (event: any) => void): void;
+	
+	// Event handlers (Node.js ws style)
+	on?(event: string, listener: (...args: any[]) => void): void;
+	off?(event: string, listener: (...args: any[]) => void): void;
+	once?(event: string, listener: (...args: any[]) => void): void;
+
+	// Common event properties
+	onopen?: ((event: any) => void) | null;
+	onclose?: ((event: any) => void) | null;
+	onmessage?: ((event: any) => void) | null;
+	onerror?: ((event: any) => void) | null;
+}
+
 // HTTP Request interface (Web Standards compatible)
 export interface RuntimeRequest {
 	url?: string;
@@ -122,4 +148,31 @@ export function getParametersFromRequest(
 
 	const queryString = url.substring(queryStart + 1);
 	return new WebStandardsParameters(queryString);
+}
+
+/**
+ * Helper to normalize WebSocket event listeners across different implementations
+ */
+export function addWebSocketListener(
+	ws: RuntimeWebSocket,
+	event: string,
+	handler: (event: any) => void,
+): void {
+	if (ws.addEventListener) {
+		ws.addEventListener(event, handler);
+	} else if (ws.on) {
+		ws.on(event, handler);
+	}
+}
+
+export function removeWebSocketListener(
+	ws: RuntimeWebSocket,
+	event: string,
+	handler: (event: any) => void,
+): void {
+	if (ws.removeEventListener) {
+		ws.removeEventListener(event, handler);
+	} else if (ws.off) {
+		ws.off(event, handler);
+	}
 }

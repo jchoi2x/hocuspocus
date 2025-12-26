@@ -1,5 +1,4 @@
 import { Mutex } from "async-mutex";
-import type WebSocket from "ws";
 import {
 	Awareness,
 	applyAwarenessUpdate,
@@ -8,6 +7,7 @@ import {
 import { Doc, applyUpdate, encodeStateAsUpdate } from "yjs";
 import type Connection from "./Connection.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
+import type { RuntimeWebSocket } from "./runtime.ts";
 import type { AwarenessUpdate } from "./types.ts";
 
 export class Document extends Doc {
@@ -24,7 +24,7 @@ export class Document extends Doc {
 	};
 
 	connections: Map<
-		WebSocket,
+		RuntimeWebSocket,
 		{
 			clients: Set<any>;
 			connection: Connection;
@@ -172,7 +172,7 @@ export class Document extends Doc {
 	/**
 	 * Get the client ids for the given connection instance
 	 */
-	getClients(connectionInstance: WebSocket): Set<any> {
+	getClients(connectionInstance: RuntimeWebSocket): Set<any> {
 		const connection = this.connections.get(connectionInstance);
 
 		return connection?.clients === undefined ? new Set() : connection.clients;
@@ -200,7 +200,7 @@ export class Document extends Doc {
 	 */
 	private handleAwarenessUpdate(
 		{ added, updated, removed }: AwarenessUpdate,
-		connectionInstance: WebSocket,
+		connectionInstance: RuntimeWebSocket,
 	): Document {
 		const changedClients = added.concat(updated, removed);
 
