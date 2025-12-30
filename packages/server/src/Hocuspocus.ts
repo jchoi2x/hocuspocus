@@ -11,6 +11,7 @@ import {
 	type RuntimeRequest,
 	type RuntimeWebSocket,
 	defaultRuntimeCrypto,
+	wrapWebSocket,
 } from "./runtime.ts";
 import type { Server } from "./Server.ts";
 import type {
@@ -200,8 +201,11 @@ export class Hocuspocus {
 		request: RuntimeRequest | any,
 		defaultContext: any = {},
 	): void {
+		// Wrap the WebSocket to provide consistent EventEmitter interface
+		const wrappedSocket = wrapWebSocket(incoming);
+		
 		const clientConnection = new ClientConnection(
-			incoming,
+			wrappedSocket,
 			request,
 			this,
 			this.hooks.bind(this),

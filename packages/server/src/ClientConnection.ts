@@ -13,11 +13,14 @@ import type { Hocuspocus } from "./Hocuspocus.ts";
 import { IncomingMessage as SocketIncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
 import {
+	type ConnectionContext,
 	type RuntimeCrypto,
 	type RuntimeRequest,
 	type RuntimeWebSocket,
+	WebSocketEventEmitter,
 	addWebSocketListener,
 	defaultRuntimeCrypto,
+	wrapWebSocket,
 } from "./runtime.ts";
 import type {
 	ConnectionConfiguration,
@@ -50,9 +53,9 @@ export class ClientConnection {
 		string,
 		{
 			instance: Hocuspocus;
-			request: any;
-			requestHeaders: any;
-			requestParameters: any;
+			request: RuntimeRequest;
+			requestHeaders: Map<string, string> | Headers | Record<string, string | string[]>;
+			requestParameters: URLSearchParams;
 			socketId: string;
 			connectionConfig: ConnectionConfiguration;
 			context: any;
@@ -83,8 +86,8 @@ export class ClientConnection {
 	 * load the Document then.
 	 */
 	constructor(
-		private readonly websocket: RuntimeWebSocket,
-		private readonly request: any,
+		private readonly websocket: WebSocketEventEmitter,
+		private readonly request: RuntimeRequest,
 		private readonly documentProvider: {
 			createDocument: Hocuspocus["createDocument"];
 		},
@@ -98,15 +101,12 @@ export class ClientConnection {
 		this.timeout = opts.timeout;
 		this.pingInterval = setInterval(this.check, this.timeout);
 		
-		// Handle pong event (works with both ws package and Web Standards WebSocket)
+		// Use EventEmitter-style interface (works with all WebSocket types)
 		if (websocket.on) {
 			websocket.on("pong", this.handlePong);
-			websocket.on("message", this.messageHandler);
-			websocket.once("close", this.handleWebsocketClose);
-		} else if (websocket.addEventListener) {
-			websocket.addEventListener("message", this.messageHandler as any);
-			websocket.addEventListener("close", this.handleWebsocketClose as any);
 		}
+		websocket.on("message", this.messageHandler);
+		websocket.once("close", this.handleWebsocketClose);
 	}
 
 	private handleWebsocketClose = (code: number, reason: Buffer) => {
@@ -159,7 +159,7 @@ export class ClientConnection {
 	 * Create a new connection by the given request and document
 	 */
 	private createConnection(
-		connection: RuntimeWebSocket,
+		connection: WebSocketEventEmitter,
 		document: Document,
 	): Connection {
 		const hookPayload = this.hookPayloads[document.name];
