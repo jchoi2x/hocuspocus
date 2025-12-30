@@ -1,14 +1,13 @@
-import type { IncomingMessage as HTTPIncomingMessage } from "node:http";
 import {
 	type CloseEvent,
 	ResetConnection,
 	WsReadyStates,
 } from "@hocuspocus/common";
-import type WebSocket from "ws";
 import type Document from "./Document.ts";
 import { IncomingMessage } from "./IncomingMessage.ts";
 import { MessageReceiver } from "./MessageReceiver.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
+import type { RuntimeWebSocket, WebSocketEventEmitter } from "./runtime.ts";
 import type {
 	beforeSyncPayload,
 	onStatelessPayload,
@@ -16,13 +15,13 @@ import type {
 } from "./types.ts";
 
 export class Connection {
-	webSocket: WebSocket;
+	webSocket: RuntimeWebSocket | WebSocketEventEmitter;
 
 	context: any;
 
 	document: Document;
 
-	request: HTTPIncomingMessage;
+	request: any;
 
 	callbacks = {
 		onClose: [(document: Document, event?: CloseEvent) => {}],
@@ -45,8 +44,8 @@ export class Connection {
 	 * Constructor.
 	 */
 	constructor(
-		connection: WebSocket,
-		request: HTTPIncomingMessage,
+		connection: RuntimeWebSocket | WebSocketEventEmitter,
+		request: any,
 		document: Document,
 		socketId: string,
 		context: any,
@@ -59,7 +58,10 @@ export class Connection {
 		this.socketId = socketId;
 		this.readOnly = readOnly;
 
-		this.webSocket.binaryType = "nodebuffer";
+		// Set binaryType if supported (Node.js ws package)
+		if (this.webSocket.binaryType !== undefined) {
+			this.webSocket.binaryType = "nodebuffer";
+		}
 		this.document.addConnection(this);
 
 		this.sendCurrentAwareness();

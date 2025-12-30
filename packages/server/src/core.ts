@@ -1,7 +1,6 @@
 /**
- * Main entry point - includes everything for backward compatibility
- * For runtime-agnostic usage, import from '@hocuspocus/server/core'
- * For Node.js-specific usage, import from '@hocuspocus/server/node'
+ * Runtime-agnostic core exports
+ * This module exports only the platform-independent parts of Hocuspocus
  */
 
 export * from "./Connection.ts";
@@ -10,7 +9,9 @@ export * from "./Hocuspocus.ts";
 export * from "./IncomingMessage.ts";
 export * from "./MessageReceiver.ts";
 export * from "./OutgoingMessage.ts";
-export * from "./Server.ts";
 export * from "./types.ts";
 export * from "./util/debounce.ts";
 export * from "./runtime.ts";
+
+// Note: Server is NOT exported here as it's Node.js-specific
+// Import from '@hocuspocus/server/node' for Node.js Server class

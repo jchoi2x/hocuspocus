@@ -1,6 +1,3 @@
-import crypto from "node:crypto";
-import type { IncomingHttpHeaders, IncomingMessage } from "node:http";
-import type { URLSearchParams } from "node:url";
 import {
 	type CloseEvent,
 	ConnectionTimeout,
@@ -10,12 +7,21 @@ import {
 	WsReadyStates,
 } from "@hocuspocus/common";
 import * as decoding from "lib0/decoding";
-import type WebSocket from "ws";
 import Connection from "./Connection.ts";
 import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
 import { IncomingMessage as SocketIncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
+import {
+	type ConnectionContext,
+	type RuntimeCrypto,
+	type RuntimeRequest,
+	type RuntimeWebSocket,
+	WebSocketEventEmitter,
+	addWebSocketListener,
+	defaultRuntimeCrypto,
+	wrapWebSocket,
+} from "./runtime.ts";
 import type {
 	ConnectionConfiguration,
 	beforeHandleMessagePayload,
@@ -47,8 +53,8 @@ export class ClientConnection {
 		string,
 		{
 			instance: Hocuspocus;
-			request: IncomingMessage;
-			requestHeaders: IncomingHttpHeaders;
+			request: RuntimeRequest;
+			requestHeaders: Map<string, string> | Headers | Record<string, string | string[]>;
 			requestParameters: URLSearchParams;
 			socketId: string;
 			connectionConfig: ConnectionConfiguration;
@@ -61,11 +67,11 @@ export class ClientConnection {
 	};
 
 	// Every new connection gets a unique identifier.
-	private readonly socketId = crypto.randomUUID();
+	private readonly socketId = defaultRuntimeCrypto.randomUUID();
 
 	timeout: number;
 
-	pingInterval: NodeJS.Timeout;
+	pingInterval: any;
 
 	pongReceived = true;
 
@@ -80,8 +86,8 @@ export class ClientConnection {
 	 * load the Document then.
 	 */
 	constructor(
-		private readonly websocket: WebSocket,
-		private readonly request: IncomingMessage,
+		private readonly websocket: WebSocketEventEmitter,
+		private readonly request: RuntimeRequest,
 		private readonly documentProvider: {
 			createDocument: Hocuspocus["createDocument"];
 		},
@@ -94,8 +100,11 @@ export class ClientConnection {
 	) {
 		this.timeout = opts.timeout;
 		this.pingInterval = setInterval(this.check, this.timeout);
-		websocket.on("pong", this.handlePong);
-
+		
+		// Use EventEmitter-style interface (works with all WebSocket types)
+		if (websocket.on) {
+			websocket.on("pong", this.handlePong);
+		}
 		websocket.on("message", this.messageHandler);
 		websocket.once("close", this.handleWebsocketClose);
 	}
@@ -150,7 +159,7 @@ export class ClientConnection {
 	 * Create a new connection by the given request and document
 	 */
 	private createConnection(
-		connection: WebSocket,
+		connection: WebSocketEventEmitter,
 		document: Document,
 	): Connection {
 		const hookPayload = this.hookPayloads[document.name];

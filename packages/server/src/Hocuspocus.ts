@@ -1,7 +1,4 @@
-import crypto from "node:crypto";
-import type { IncomingMessage } from "node:http";
 import { ResetConnection, awarenessStatesToArray } from "@hocuspocus/common";
-import type WebSocket from "ws";
 import type { Doc } from "yjs";
 import { applyUpdate, encodeStateAsUpdate } from "yjs";
 import meta from "../package.json" assert { type: "json" };
@@ -9,6 +6,13 @@ import { ClientConnection } from "./ClientConnection.ts";
 import type Connection from "./Connection.ts";
 import { DirectConnection } from "./DirectConnection.ts";
 import Document from "./Document.ts";
+import {
+	type RuntimeCrypto,
+	type RuntimeRequest,
+	type RuntimeWebSocket,
+	defaultRuntimeCrypto,
+	wrapWebSocket,
+} from "./runtime.ts";
 import type { Server } from "./Server.ts";
 import type {
 	AwarenessUpdate,
@@ -67,6 +71,8 @@ export class Hocuspocus {
 	documents: Map<string, Document> = new Map();
 
 	server?: Server;
+
+	runtime: RuntimeCrypto = defaultRuntimeCrypto;
 
 	debouncer = useDebounce();
 
@@ -191,12 +197,15 @@ export class Hocuspocus {
 	 * load the Document then.
 	 */
 	handleConnection(
-		incoming: WebSocket,
-		request: IncomingMessage,
+		incoming: RuntimeWebSocket,
+		request: RuntimeRequest | any,
 		defaultContext: any = {},
 	): void {
+		// Wrap the WebSocket to provide consistent EventEmitter interface
+		const wrappedSocket = wrapWebSocket(incoming);
+		
 		const clientConnection = new ClientConnection(
-			incoming,
+			wrappedSocket,
 			request,
 			this,
 			this.hooks.bind(this),
@@ -551,7 +560,7 @@ export class Hocuspocus {
 		const document: Document = await this.createDocument(
 			documentName,
 			{}, // direct connection has no request params
-			crypto.randomUUID(),
+			this.runtime.randomUUID(),
 			connectionConfig,
 			context,
 		);

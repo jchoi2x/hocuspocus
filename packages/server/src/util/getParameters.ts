@@ -1,11 +1,9 @@
-import type { IncomingMessage } from "node:http";
-import { URLSearchParams } from "node:url";
-
 /**
  * Get parameters by the given request
+ * Works with any object that has a url property
  */
 export function getParameters(
-	request?: Pick<IncomingMessage, "url">,
+	request?: { url?: string },
 ): URLSearchParams {
 	const query = request?.url?.split("?") || [];
 	return new URLSearchParams(query[1] ? query[1] : "");
