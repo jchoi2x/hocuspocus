@@ -8,6 +8,10 @@ import type Connection from "./Connection.ts";
 import type Document from "./Document.ts";
 import type { Hocuspocus } from "./Hocuspocus.ts";
 
+// Re-export Node.js types for use in core files
+// This centralizes runtime-specific type imports in one location
+export type { IncomingHttpHeaders, IncomingMessage, ServerResponse };
+
 export enum MessageType {
 	Unknown = -1,
 	Sync = 0,

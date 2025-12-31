@@ -1,4 +1,4 @@
-import type { IncomingMessage } from "node:http";
+import type { IncomingMessage } from "../types.ts";
 
 /**
  * Get parameters by the given request

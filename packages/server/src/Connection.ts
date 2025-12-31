@@ -1,4 +1,3 @@
-import type { IncomingMessage as HTTPIncomingMessage } from "node:http";
 import {
 	type CloseEvent,
 	ResetConnection,
@@ -10,6 +9,7 @@ import { IncomingMessage } from "./IncomingMessage.ts";
 import { MessageReceiver } from "./MessageReceiver.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
 import type {
+	IncomingMessage as HTTPIncomingMessage,
 	beforeSyncPayload,
 	onStatelessPayload,
 	onTokenSyncPayload,

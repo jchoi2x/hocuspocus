@@ -1,4 +1,3 @@
-import type { IncomingMessage } from "node:http";
 import { ResetConnection, awarenessStatesToArray } from "@hocuspocus/common";
 import type WebSocket from "ws";
 import type { Doc } from "yjs";
@@ -15,6 +14,7 @@ import type {
 	ConnectionConfiguration,
 	HookName,
 	HookPayloadByName,
+	IncomingMessage,
 	beforeBroadcastStatelessPayload,
 	onChangePayload,
 	onDisconnectPayload,

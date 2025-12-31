@@ -1,4 +1,3 @@
-import type { IncomingHttpHeaders, IncomingMessage } from "node:http";
 import {
 	type CloseEvent,
 	ConnectionTimeout,
@@ -16,6 +15,8 @@ import { IncomingMessage as SocketIncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
 import type {
 	ConnectionConfiguration,
+	IncomingHttpHeaders,
+	IncomingMessage,
 	beforeHandleMessagePayload,
 	beforeSyncPayload,
 	onDisconnectPayload,
