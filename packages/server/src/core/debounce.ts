@@ -11,7 +11,7 @@ export const useDebounce = (runtime: RuntimeAdapter) => {
 			timeout: TimerHandle;
 			start: number;
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-			func: () => any | Promise<() => any>;
+			func: () => any | Promise<any>;
 		}
 	> = new Map();
 
@@ -20,7 +20,7 @@ export const useDebounce = (runtime: RuntimeAdapter) => {
 	const debounce = async (
 		id: string,
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-		func: () => any | Promise<() => any>,
+		func: () => any | Promise<any>,
 		debounce: number,
 		maxDebounce: number,
 	) => {
