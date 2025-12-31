@@ -1,21 +1,16 @@
 {
 	"private": true,
-	"workspaces": ["playground/*", "packages/*", "tests"],
-	"browserslist": ["defaults", "not IE 11", "maintained node versions"],
+	"workspaces": [
+		"playground/*",
+		"packages/*",
+		"tests"
+	],
+	"browserslist": [
+		"defaults",
+		"not IE 11",
+		"maintained node versions"
+	],
 	"type": "module",
-	"ava": {
-		"files": ["tests/**/*", "!tests/utils/**/*", "!database/**/*"],
-		"extensions": {
-			"ts": "module"
-		},
-		"nodeArguments": [
-			"--no-warnings",
-			"--conditions=source",
-			"--experimental-transform-types",
-			"--experimental-specifier-resolution=node"
-		],
-		"workerThreads": false
-	},
 	"scripts": {
 		"start": "npm run playground",
 		"playground": "npm run playground:default",
@@ -29,8 +24,8 @@
 		"lint:ts": "tsc --noEmit -p tsconfig.json --composite false",
 		"lint": "biome lint && npm run lint:ts",
 		"lint:fix": "biome lint --fix",
-		"test": "ava",
-		"test:watch": "ava --watch",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"build:packages": "npm run clean:packages && rollup -c",
 		"build:watch": "npm run clean:packages && rollup -wc",
 		"clean:packages": "rm -Rf ./packages/*/dist",
@@ -44,10 +39,11 @@
 		"publish": "npm run build:packages && lerna exec --since --no-private -- npm publish --access public",
 		"publish:pre": "npm run build:packages && lerna exec --since --no-private -- npm publish --tag next --access public",
 		"reset": "npm run clean:packages && rm -Rf ./**/.cache && rm -Rf ./**/.temp && rm -Rf ./**/node_modules && rm -Rf ./package-lock.json && npm install",
-		"ncu": "ncu -i --deep && npm install"
+		"ncu": "ncu -i --deep && npm install",
+		"test:ui": "vitest --ui",
+		"test:coverage": "vitest run --coverage"
 	},
 	"devDependencies": {
-		"@ava/typescript": "^3.0.1",
 		"@babel/core": "7.18.6",
 		"@babel/preset-env": "^7.16.11",
 		"@biomejs/biome": "1.9.4",
@@ -58,14 +54,16 @@
 		"@rollup/plugin-commonjs": "^26.0.1",
 		"@rollup/plugin-json": "^6.1.0",
 		"@rollup/plugin-node-resolve": "^15.2.3",
-		"ava": "^4.3.3",
+		"@rollup/plugin-typescript": "^12.1.2",
+		"@vitest/coverage-v8": "^4.0.16",
+		"@vitest/ui": "^4.0.16",
 		"concurrently": "^6.4.0",
 		"lerna": "^8.2.1",
 		"minimist": "^1.2.5",
 		"rollup": "^4.37.0",
 		"rollup-plugin-auto-external": "^2.0.0",
-		"@rollup/plugin-typescript": "^12.1.2",
-		"typescript": "5.8.2"
+		"typescript": "5.8.2",
+		"vitest": "^4.0.16"
 	},
 	"engines": {
 		"node": ">=22"
