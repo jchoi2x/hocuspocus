@@ -1,6 +1,4 @@
-import crypto from "node:crypto";
 import type { IncomingHttpHeaders, IncomingMessage } from "node:http";
-import type { URLSearchParams } from "node:url";
 import {
 	type CloseEvent,
 	ConnectionTimeout,
@@ -21,6 +19,7 @@ import type {
 	beforeHandleMessagePayload,
 	beforeSyncPayload,
 	onDisconnectPayload,
+	onTokenSyncPayload,
 } from "./types.ts";
 import { MessageType } from "./types.ts";
 import { getParameters } from "./util/getParameters.ts";
@@ -61,7 +60,7 @@ export class ClientConnection {
 	};
 
 	// Every new connection gets a unique identifier.
-	private readonly socketId = crypto.randomUUID();
+	private readonly socketId = globalThis.crypto.randomUUID();
 
 	timeout: number;
 
@@ -256,9 +255,10 @@ export class ClientConnection {
 					{
 						...hookPayload,
 						...payload,
+						document,
 						connection,
 						documentName,
-					},
+					} as onTokenSyncPayload,
 					(contextAdditions: any) => {
 						hookPayload.context = {
 							...hookPayload.context,

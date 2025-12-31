@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import type { IncomingMessage } from "node:http";
 import { ResetConnection, awarenessStatesToArray } from "@hocuspocus/common";
 import type WebSocket from "ws";
@@ -551,7 +550,7 @@ export class Hocuspocus {
 		const document: Document = await this.createDocument(
 			documentName,
 			{}, // direct connection has no request params
-			crypto.randomUUID(),
+			globalThis.crypto.randomUUID(),
 			connectionConfig,
 			context,
 		);

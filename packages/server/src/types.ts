@@ -3,7 +3,6 @@ import type {
 	IncomingMessage,
 	ServerResponse,
 } from "node:http";
-import type { URLSearchParams } from "node:url";
 import type { Awareness } from "y-protocols/awareness";
 import type Connection from "./Connection.ts";
 import type Document from "./Document.ts";

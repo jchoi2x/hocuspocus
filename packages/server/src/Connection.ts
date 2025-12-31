@@ -116,7 +116,7 @@ export class Connection {
 	 * Set a callback that will be triggered when on token sync message is received
 	 */
 	onTokenSyncCallback(
-		callback: (payload: onTokenSyncPayload) => Promise<void>,
+		callback: (payload: Partial<onTokenSyncPayload>) => Promise<void>,
 	): Connection {
 		this.callbacks.onTokenSyncCallback = callback;
 
