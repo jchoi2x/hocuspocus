@@ -62,40 +62,91 @@ async function build(commandLineArgs) {
 			// importAssertions(),
 		];
 
-		config.push({
-			// perf: true,
-			input,
-			output: [
-				{
-					name,
-					file: path.join(basePath, exports.default.require),
-					format: "cjs",
-					sourcemap: true,
-					exports: "auto",
-				},
-				{
-					name,
-					file: path.join(basePath, exports.default.import),
-					format: "es",
-					sourcemap: true,
-				},
-			],
-			plugins: [
-				autoExternal({
-					packagePath: path.join(basePath, "package.json"),
-				}),
-				...basePlugins,
-				typescript({
-					compilerOptions: {
-						declaration: true,
-						declarationDir: path.join(basePath, "dist"),
-						paths: {
-							"@hocuspocus/*": ["packages/*/src"],
-						},
+		// Build main entry point
+		const mainExport = exports["."] || exports.default || exports;
+		if (mainExport) {
+			// Handle nested exports structure (e.g., exports["."]["default"])
+			const actualExport = mainExport.default || mainExport.node || mainExport;
+			config.push({
+				// perf: true,
+				input,
+				output: [
+					actualExport.require && {
+						name,
+						file: path.join(basePath, actualExport.require),
+						format: "cjs",
+						sourcemap: true,
+						exports: "auto",
 					},
-					include: [],
-				}),
-			],
+					actualExport.import && {
+						name,
+						file: path.join(basePath, actualExport.import),
+						format: "es",
+						sourcemap: true,
+					},
+				].filter(Boolean),
+				plugins: [
+					autoExternal({
+						packagePath: path.join(basePath, "package.json"),
+					}),
+					...basePlugins,
+					typescript({
+						compilerOptions: {
+							declaration: true,
+							declarationDir: path.join(basePath, "dist"),
+							paths: {
+								"@hocuspocus/*": ["packages/*/src"],
+							},
+						},
+						include: [],
+					}),
+				],
+			});
+		}
+
+		// Build runtime-specific entry points
+		const runtimeEntries = ["./node", "./bun", "./deno", "./cloudflare-workers"];
+		runtimeEntries.forEach((entryPath) => {
+			const entryExport = exports[entryPath];
+			if (!entryExport) return;
+
+			const entryName = entryPath.replace("./", "");
+			const entryInput = path.join(basePath, `src/entries/${entryName}.ts`);
+
+			config.push({
+				input: entryInput,
+				output: [
+					entryExport.require && {
+						name: `${name}/${entryName}`,
+						file: path.join(basePath, entryExport.require),
+						format: "cjs",
+						sourcemap: true,
+						exports: "auto",
+					},
+					entryExport.import && {
+						name: `${name}/${entryName}`,
+						file: path.join(basePath, entryExport.import),
+						format: "es",
+						sourcemap: true,
+					},
+				].filter(Boolean),
+				plugins: [
+					autoExternal({
+						packagePath: path.join(basePath, "package.json"),
+					}),
+					...basePlugins,
+					typescript({
+						compilerOptions: {
+							declaration: true,
+							declarationDir: path.join(basePath, `dist/entries`),
+							paths: {
+								"@hocuspocus/*": ["packages/*/src"],
+							},
+						},
+						include: [],
+					}),
+				],
+			});
 		});
 	});
 

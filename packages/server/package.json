@@ -15,13 +15,50 @@
 	"module": "dist/hocuspocus-server.esm.js",
 	"types": "dist/packages/server/src/index.d.ts",
 	"exports": {
-		"source": {
-			"import": "./src/index.ts"
+		".": {
+			"source": {
+				"import": "./src/index.ts"
+			},
+			"node": {
+				"import": "./dist/hocuspocus-server.esm.js",
+				"require": "./dist/hocuspocus-server.cjs",
+				"types": "./dist/packages/server/src/index.d.ts"
+			},
+			"default": {
+				"import": "./dist/hocuspocus-server.esm.js",
+				"require": "./dist/hocuspocus-server.cjs",
+				"types": "./dist/packages/server/src/index.d.ts"
+			}
 		},
-		"default": {
-			"import": "./dist/hocuspocus-server.esm.js",
-			"require": "./dist/hocuspocus-server.cjs",
-			"types": "./dist/packages/server/src/index.d.ts"
+		"./node": {
+			"source": {
+				"import": "./src/entries/node.ts"
+			},
+			"import": "./dist/entries/node.esm.js",
+			"require": "./dist/entries/node.cjs",
+			"types": "./dist/entries/node.d.ts"
+		},
+		"./bun": {
+			"source": {
+				"import": "./src/entries/bun.ts"
+			},
+			"import": "./dist/entries/bun.esm.js",
+			"require": "./dist/entries/bun.cjs",
+			"types": "./dist/entries/bun.d.ts"
+		},
+		"./deno": {
+			"source": {
+				"import": "./src/entries/deno.ts"
+			},
+			"import": "./dist/entries/deno.esm.js",
+			"types": "./dist/entries/deno.d.ts"
+		},
+		"./cloudflare-workers": {
+			"source": {
+				"import": "./src/entries/cloudflare-workers.ts"
+			},
+			"import": "./dist/entries/cloudflare-workers.esm.js",
+			"types": "./dist/entries/cloudflare-workers.d.ts"
 		}
 	},
 	"files": [
