@@ -36,7 +36,7 @@
 			},
 			"import": "./dist/entries/node.esm.js",
 			"require": "./dist/entries/node.cjs",
-			"types": "./dist/packages/server/src/entries/node.d.ts"
+			"types": "./dist/entries/node.d.ts"
 		},
 		"./bun": {
 			"source": {
@@ -44,21 +44,21 @@
 			},
 			"import": "./dist/entries/bun.esm.js",
 			"require": "./dist/entries/bun.cjs",
-			"types": "./dist/packages/server/src/entries/bun.d.ts"
+			"types": "./dist/entries/bun.d.ts"
 		},
 		"./deno": {
 			"source": {
 				"import": "./src/entries/deno.ts"
 			},
 			"import": "./dist/entries/deno.esm.js",
-			"types": "./dist/packages/server/src/entries/deno.d.ts"
+			"types": "./dist/entries/deno.d.ts"
 		},
 		"./cloudflare-workers": {
 			"source": {
 				"import": "./src/entries/cloudflare-workers.ts"
 			},
 			"import": "./dist/entries/cloudflare-workers.esm.js",
-			"types": "./dist/packages/server/src/entries/cloudflare-workers.d.ts"
+			"types": "./dist/entries/cloudflare-workers.d.ts"
 		}
 	},
 	"files": [

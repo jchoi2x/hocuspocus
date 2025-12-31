@@ -6,7 +6,7 @@
 import type { Awareness } from "y-protocols/awareness";
 import type Connection from "../Connection.ts";
 import type Document from "../Document.ts";
-import type { Hocuspocus } from "./Hocuspocus.ts";
+import type { Hocuspocus } from "../Hocuspocus.ts";
 import type { RequestLike } from "./interfaces.ts";
 
 export enum MessageType {

@@ -65,20 +65,22 @@ async function build(commandLineArgs) {
 		// Build main entry point
 		const mainExport = exports["."] || exports.default || exports;
 		if (mainExport) {
+			// Handle nested exports structure (e.g., exports["."]["default"])
+			const actualExport = mainExport.default || mainExport.node || mainExport;
 			config.push({
 				// perf: true,
 				input,
 				output: [
-					mainExport.require && {
+					actualExport.require && {
 						name,
-						file: path.join(basePath, mainExport.require),
+						file: path.join(basePath, actualExport.require),
 						format: "cjs",
 						sourcemap: true,
 						exports: "auto",
 					},
-					mainExport.import && {
+					actualExport.import && {
 						name,
-						file: path.join(basePath, mainExport.import),
+						file: path.join(basePath, actualExport.import),
 						format: "es",
 						sourcemap: true,
 					},
@@ -136,7 +138,7 @@ async function build(commandLineArgs) {
 					typescript({
 						compilerOptions: {
 							declaration: true,
-							declarationDir: path.join(basePath, "dist"),
+							declarationDir: path.join(basePath, `dist/entries`),
 							paths: {
 								"@hocuspocus/*": ["packages/*/src"],
 							},

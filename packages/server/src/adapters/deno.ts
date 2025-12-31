@@ -56,9 +56,13 @@ export class DenoRuntimeAdapter implements RuntimeAdapter {
 	normalizeRequest(request: any): import("../core/interfaces.ts").RequestLike {
 		// Deno uses web-standard Request
 		if (request instanceof Request) {
+			const headers: Record<string, string> = {};
+			request.headers.forEach((value: string, key: string) => {
+				headers[key] = value;
+			});
 			return {
 				url: request.url,
-				headers: Object.fromEntries(request.headers.entries()),
+				headers,
 				method: request.method,
 			};
 		}
