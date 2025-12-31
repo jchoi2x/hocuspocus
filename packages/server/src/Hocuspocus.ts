@@ -23,6 +23,7 @@ import type {
 } from "./types.ts";
 import { useDebounce } from "./util/debounce.ts";
 import { getParameters } from "./util/getParameters.ts";
+import { uuid } from "./util/uuid.ts";
 
 export const defaultConfiguration = {
 	name: null,
@@ -551,7 +552,7 @@ export class Hocuspocus {
 		const document: Document = await this.createDocument(
 			documentName,
 			{}, // direct connection has no request params
-			globalThis.crypto.randomUUID(),
+			uuid(),
 			connectionConfig,
 			context,
 		);

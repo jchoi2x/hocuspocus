@@ -25,6 +25,7 @@ import type {
 } from "./types.ts";
 import { MessageType } from "./types.ts";
 import { getParameters } from "./util/getParameters.ts";
+import { uuid } from "./util/uuid.ts";
 
 /**
  * The `ClientConnection` class is responsible for handling an incoming WebSocket
@@ -62,7 +63,7 @@ export class ClientConnection {
 	};
 
 	// Every new connection gets a unique identifier.
-	private readonly socketId = globalThis.crypto.randomUUID();
+	private readonly socketId = uuid();
 
 	timeout: number;
 
