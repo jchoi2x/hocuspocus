@@ -9,6 +9,7 @@ import { IncomingMessage } from "./IncomingMessage.ts";
 import { MessageReceiver } from "./MessageReceiver.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
 import type {
+	HookContext,
 	IncomingMessage as HTTPIncomingMessage,
 	beforeSyncPayload,
 	onStatelessPayload,
@@ -18,7 +19,7 @@ import type {
 export class Connection {
 	webSocket: WebSocket;
 
-	context: any;
+	context: HookContext;
 
 	document: Document;
 
@@ -49,7 +50,7 @@ export class Connection {
 		request: HTTPIncomingMessage,
 		document: Document,
 		socketId: string,
-		context: any,
+		context: HookContext,
 		readOnly = false,
 	) {
 		this.webSocket = connection;
@@ -126,7 +127,7 @@ export class Connection {
 	/**
 	 * Send the given message
 	 */
-	send(message: any): void {
+	send(message: Uint8Array | ArrayBuffer | string): void {
 		if (
 			this.webSocket.readyState === WsReadyStates.Closing ||
 			this.webSocket.readyState === WsReadyStates.Closed
@@ -136,7 +137,7 @@ export class Connection {
 		}
 
 		try {
-			this.webSocket.send(message, (error: any) => {
+			this.webSocket.send(message, (error: Error | undefined) => {
 				if (error != null) this.close();
 			});
 		} catch (exception) {
@@ -218,25 +219,27 @@ export class Connection {
 			.then(() => {
 				try {
 					new MessageReceiver(message).apply(this.document, this);
-				} catch (e: any) {
+				} catch (e: unknown) {
+					const error = e as { code?: number; reason?: string };
 					console.error(
 						`closing connection ${this.socketId} (while handling ${documentName}) because of exception`,
 						e,
 					);
 					this.close({
-						code: "code" in e ? e.code : ResetConnection.code,
-						reason: "reason" in e ? e.reason : ResetConnection.reason,
+						code: error.code ?? ResetConnection.code,
+						reason: error.reason ?? ResetConnection.reason,
 					});
 				}
 			})
-			.catch((e: any) => {
+			.catch((e: unknown) => {
+				const error = e as { code?: number; reason?: string };
 				console.error(
 					`closing connection ${this.socketId} (while handling ${documentName}) because of exception`,
 					e,
 				);
 				this.close({
-					code: "code" in e ? e.code : ResetConnection.code,
-					reason: "reason" in e ? e.reason : ResetConnection.reason,
+					code: error.code ?? ResetConnection.code,
+					reason: error.reason ?? ResetConnection.reason,
 				});
 			});
 	}

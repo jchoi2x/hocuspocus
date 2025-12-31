@@ -12,6 +12,7 @@ import type {
 	AwarenessUpdate,
 	Configuration,
 	ConnectionConfiguration,
+	HookContext,
 	HookName,
 	HookPayloadByName,
 	IncomingMessage,

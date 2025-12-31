@@ -136,7 +136,7 @@ export class Server {
 		}
 	};
 
-	async listen(port?: number, callback: any = null): Promise<Hocuspocus> {
+	async listen(port?: number, callback?: () => Promise<void>): Promise<Hocuspocus> {
 		if (port) {
 			this.configuration.port = port;
 		}

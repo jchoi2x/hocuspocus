@@ -25,9 +25,9 @@ export interface RuntimeWebSocket {
 	close(code?: number, reason?: string): void;
 	
 	// Event listener management (on/once/removeListener for Node, addEventListener for Web)
-	on(event: string, listener: (...args: any[]) => void): void;
-	once(event: string, listener: (...args: any[]) => void): void;
-	removeListener(event: string, listener: (...args: any[]) => void): void;
+	on(event: string, listener: (...args: unknown[]) => void): void;
+	once(event: string, listener: (...args: unknown[]) => void): void;
+	removeListener(event: string, listener: (...args: unknown[]) => void): void;
 	
 	// Allow setting max listeners (Node.js specific, but optional)
 	setMaxListeners?(count: number): void;

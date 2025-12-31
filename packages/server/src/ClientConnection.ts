@@ -15,6 +15,7 @@ import { IncomingMessage as SocketIncomingMessage } from "./IncomingMessage.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
 import type {
 	ConnectionConfiguration,
+	HookContext,
 	IncomingHttpHeaders,
 	IncomingMessage,
 	beforeHandleMessagePayload,
@@ -90,7 +91,7 @@ export class ClientConnection {
 		private readonly opts: {
 			timeout: number;
 		},
-		private readonly defaultContext: any = {},
+		private readonly defaultContext: HookContext = {},
 	) {
 		this.timeout = opts.timeout;
 		this.pingInterval = setInterval(this.check, this.timeout);
@@ -184,8 +185,9 @@ export class ClientConnection {
 		instance.onStatelessCallback(async (payload) => {
 			try {
 				return await this.hooks("onStateless", payload);
-			} catch (error: any) {
-				if (error?.message) {
+			} catch (error: unknown) {
+				const err = error as { message?: string };
+				if (err?.message) {
 					// if a hook rejects and the error is empty, do nothing
 					// this is only meant to prevent later hooks and the
 					// default handler to do something. if an error is present
@@ -260,17 +262,17 @@ export class ClientConnection {
 						connection,
 						documentName,
 					} as onTokenSyncPayload,
-					(contextAdditions: any) => {
+					(contextAdditions: HookContext) => {
 						hookPayload.context = {
 							...hookPayload.context,
 							...contextAdditions,
 						};
 					},
 				);
-			} catch (err: any) {
+			} catch (err: unknown) {
 				console.error(err);
-				const error = { ...Unauthorized, ...err };
-				connection.close({ code: error.code, reason: error.reason });
+				const error = { ...Unauthorized, ...(err as Record<string, unknown>) };
+				connection.close({ code: error.code as number, reason: error.reason as string });
 			}
 		});
 
@@ -332,7 +334,7 @@ export class ClientConnection {
 				await this.hooks(
 					"onConnect",
 					{ ...hookPayload, documentName },
-					(contextAdditions: any) => {
+					(contextAdditions: HookContext) => {
 						// merge context from all hooks
 						hookPayload.context = {
 							...hookPayload.context,
@@ -348,7 +350,7 @@ export class ClientConnection {
 						...hookPayload,
 						documentName,
 					},
-					(contextAdditions: any) => {
+					(contextAdditions: HookContext) => {
 						// Hooks are allowed to give us even more context and we’ll merge everything together.
 						// We’ll pass the context to other hooks then.
 						hookPayload.context = {
@@ -369,8 +371,8 @@ export class ClientConnection {
 
 				// Time to actually establish the connection.
 				await this.setUpNewConnection(documentName);
-			} catch (err: any) {
-				const error = err || Forbidden;
+			} catch (err: unknown) {
+				const error = (err as { reason?: string }) || Forbidden;
 				const message = new OutgoingMessage(documentName).writePermissionDenied(
 					error.reason ?? "permission-denied",
 				);

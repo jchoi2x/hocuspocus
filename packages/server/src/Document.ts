@@ -208,8 +208,8 @@ export class Document extends Doc {
 			const connection = this.connections.get(connectionInstance);
 
 			if (connection) {
-				added.forEach((clientId: any) => connection.clients.add(clientId));
-				removed.forEach((clientId: any) => connection.clients.delete(clientId));
+				added.forEach((clientId: number) => connection.clients.add(clientId));
+				removed.forEach((clientId: number) => connection.clients.delete(clientId));
 			}
 		}
 

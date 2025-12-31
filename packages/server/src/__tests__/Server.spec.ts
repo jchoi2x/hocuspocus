@@ -1,6 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { Server } from '../Server';
-import type { ServerConfiguration } from '../types';
+import { Server, type ServerConfiguration } from '../Server';
 
 let server: Awaited<ReturnType<Server['listen']>> | null = null;
 
