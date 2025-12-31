@@ -69,39 +69,26 @@ Deno.serve({ port: 1234 }, (request) => {
 #### Cloudflare Workers
 
 ```typescript
-import { Hocuspocus } from "@hocuspocus/server/cloudflare-workers";
+import { BaseHocuspocusDurableObject } from "@hocuspocus/server/cloudflare-workers";
+import * as Y from "yjs";
 
-export class HocuspocusDurableObject {
-  state: DurableObjectState;
-  hocuspocus: Hocuspocus;
-  
+export class HocuspocusDurableObject extends BaseHocuspocusDurableObject {
   constructor(state: DurableObjectState, env: Env) {
-    this.state = state;
-    this.hocuspocus = new Hocuspocus({
-      // ... your configuration
+    super(state, env, {
+      // Your Hocuspocus configuration
+      onLoadDocument: async ({ documentName }) => {
+        const data = await this.ctx.storage.get(documentName);
+        return data ? new Uint8Array(data as ArrayBuffer) : undefined;
+      },
+      onStoreDocument: async ({ documentName, document }) => {
+        const state = Y.encodeStateAsUpdate(document);
+        await this.ctx.storage.put(documentName, state);
+      },
     });
-  }
-  
-  async fetch(request: Request) {
-    const upgrade = request.headers.get("Upgrade");
-    
-    if (upgrade === "websocket") {
-      const pair = new WebSocketPair();
-      const [client, server] = Object.values(pair);
-      
-      this.state.acceptWebSocket(server);
-      this.hocuspocus.handleConnection(server, request);
-      
-      return new Response(null, {
-        status: 101,
-        webSocket: client,
-      });
-    }
-    
-    return new Response("Hocuspocus Server", { status: 200 });
   }
 }
 ```
+
 
 For more details, see [MULTI_RUNTIME.md](./MULTI_RUNTIME.md).
 

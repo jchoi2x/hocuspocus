@@ -71,55 +71,37 @@ Deno.serve({ port: 1234 }, (request) => {
 
 ### Cloudflare Workers (Durable Objects)
 
-For Cloudflare Workers with Durable Objects:
+For Cloudflare Workers with Durable Objects, use the `BaseHocuspocusDurableObject` class which implements the hibernatable WebSocket API:
 
 ```typescript
-import { Hocuspocus } from "@hocuspocus/server/cloudflare-workers";
+import { BaseHocuspocusDurableObject } from "@hocuspocus/server/cloudflare-workers";
+import * as Y from "yjs";
 
-export class HocuspocusDurableObject {
-  state: DurableObjectState;
-  hocuspocus: Hocuspocus;
-  
+export class HocuspocusDurableObject extends BaseHocuspocusDurableObject {
   constructor(state: DurableObjectState, env: Env) {
-    this.state = state;
-    this.hocuspocus = new Hocuspocus({
-      // ... your configuration
+    super(state, env, {
+      // Your Hocuspocus configuration
       onLoadDocument: async ({ documentName }) => {
         // Load from Durable Object storage
-        const data = await this.state.storage.get(documentName);
-        if (data) {
-          return new Uint8Array(data);
-        }
+        const data = await this.ctx.storage.get(documentName);
+        return data ? new Uint8Array(data as ArrayBuffer) : undefined;
       },
       onStoreDocument: async ({ documentName, document }) => {
         // Save to Durable Object storage
         const state = Y.encodeStateAsUpdate(document);
-        await this.state.storage.put(documentName, state);
+        await this.ctx.storage.put(documentName, state);
       },
     });
   }
-  
-  async fetch(request: Request) {
-    const upgrade = request.headers.get("Upgrade");
-    
-    if (upgrade === "websocket") {
-      const pair = new WebSocketPair();
-      const [client, server] = Object.values(pair);
-      
-      // Use WebSocket hibernation API
-      this.state.acceptWebSocket(server);
-      this.hocuspocus.handleConnection(server, request);
-      
-      return new Response(null, {
-        status: 101,
-        webSocket: client,
-      });
-    }
-    
-    return new Response("Hocuspocus Server", { status: 200 });
-  }
 }
 ```
+
+The `BaseHocuspocusDurableObject` class:
+- Extends Cloudflare's `DurableObject` interface
+- Implements `webSocketMessage`, `webSocketClose`, and `webSocketError` methods for hibernatable WebSocket support
+- Wraps WebSockets with an EventEmitter-compatible interface for Hocuspocus
+- Handles the complete WebSocket lifecycle automatically
+
 
 ## Architecture
 

@@ -1,43 +1,42 @@
 /**
  * Cloudflare Workers / Durable Objects entrypoint for Hocuspocus Server
  * 
- * This entrypoint provides a Cloudflare Workers-compatible version of Hocuspocus Server.
- * It's designed to work with Durable Objects for distributed collaboration.
+ * This entrypoint provides a Cloudflare Workers-compatible version of Hocuspocus Server
+ * with support for Durable Objects and the hibernatable WebSocket API.
  * 
  * Usage in Cloudflare Workers:
  * ```typescript
- * import { Hocuspocus } from "@hocuspocus/server/cloudflare-workers";
+ * import { BaseHocuspocusDurableObject } from "@hocuspocus/server/cloudflare-workers";
+ * import * as Y from "yjs";
  * 
- * export class HocuspocusDurableObject {
- *   state: DurableObjectState;
- *   hocuspocus: Hocuspocus;
- *   
+ * export class HocuspocusDurableObject extends BaseHocuspocusDurableObject {
  *   constructor(state: DurableObjectState, env: Env) {
- *     this.state = state;
- *     this.hocuspocus = new Hocuspocus({
- *       // ... your configuration
+ *     super(state, env, {
+ *       // Your Hocuspocus configuration
+ *       onLoadDocument: async ({ documentName }) => {
+ *         const data = await this.ctx.storage.get(documentName);
+ *         return data ? new Uint8Array(data as ArrayBuffer) : undefined;
+ *       },
+ *       onStoreDocument: async ({ documentName, document }) => {
+ *         const state = Y.encodeStateAsUpdate(document);
+ *         await this.ctx.storage.put(documentName, state);
+ *       },
  *     });
- *   }
- *   
- *   async fetch(request: Request) {
- *     const upgrade = request.headers.get("Upgrade");
- *     if (upgrade === "websocket") {
- *       const pair = new WebSocketPair();
- *       const [client, server] = Object.values(pair);
- *       
- *       this.state.acceptWebSocket(server);
- *       this.hocuspocus.handleConnection(server, request);
- *       
- *       return new Response(null, { status: 101, webSocket: client });
- *     }
- *     
- *     return new Response("Hocuspocus Server", { status: 200 });
  *   }
  * }
  * ```
+ * 
+ * The BaseHocuspocusDurableObject class:
+ * - Implements the Durable Object interface with hibernatable WebSocket support
+ * - Handles webSocketMessage, webSocketClose, and webSocketError methods
+ * - Wraps WebSockets to provide EventEmitter-compatible interface for Hocuspocus
+ * - Manages WebSocket lifecycle and Hocuspocus integration
  */
 
-// Re-export core functionality that works across runtimes
+// Export the base Durable Object class (recommended approach)
+export { BaseHocuspocusDurableObject } from "../cloudflare/BaseHocuspocusDurableObject.ts";
+
+// Re-export core functionality for advanced use cases
 export { Hocuspocus, defaultConfiguration } from "../Hocuspocus.ts";
 export { ClientConnection } from "../ClientConnection.ts";
 export { Connection } from "../Connection.ts";
@@ -52,4 +51,4 @@ export * from "../types.ts";
 export { CloudflareWorkersRuntimeAdapter } from "../adapters/cloudflare-workers.ts";
 
 // Note: Server class is Node-specific and not exported here
-// Cloudflare Workers users should use Hocuspocus class directly with Durable Objects
+// Cloudflare Workers users should extend BaseHocuspocusDurableObject
