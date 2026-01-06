@@ -7,4 +7,5 @@
     "**/out": true,
     "**/target": true,
     "**/tmp": true,
+  }
 }
