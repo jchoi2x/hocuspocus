@@ -16,17 +16,17 @@ export class Document extends Doc {
 	callbacks = {
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		onUpdate: (
-			document: Document,
-			connection: Connection,
-			update: Uint8Array,
+			_document: Document,
+			_connection: Connection,
+			_update: Uint8Array,
 		) => {},
-		beforeBroadcastStateless: (document: Document, stateless: string) => {},
+		beforeBroadcastStateless: (_document: Document, _stateless: string) => {},
 	};
 
 	connections: Map<
 		WebSocket,
 		{
-			clients: Set<any>;
+			clients: Set<number>;
 			connection: Connection;
 		}
 	> = new Map();
@@ -172,7 +172,7 @@ export class Document extends Doc {
 	/**
 	 * Get the client ids for the given connection instance
 	 */
-	getClients(connectionInstance: WebSocket): Set<any> {
+	getClients(connectionInstance: WebSocket): Set<number> {
 		const connection = this.connections.get(connectionInstance);
 
 		return connection?.clients === undefined ? new Set() : connection.clients;

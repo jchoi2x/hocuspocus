@@ -54,7 +54,7 @@ export class ClientConnection {
 			requestParameters: URLSearchParams;
 			socketId: string;
 			connectionConfig: ConnectionConfiguration;
-			context: any;
+			context: HookContext;
 		}
 	> = {};
 
@@ -132,7 +132,7 @@ export class ClientConnection {
 
 		try {
 			this.websocket.ping();
-		} catch (error) {
+		} catch {
 			this.close(ConnectionTimeout);
 		}
 	};
@@ -382,7 +382,7 @@ export class ClientConnection {
 			}
 
 			// Catch errors due to failed decoding of data
-		} catch (error) {
+		} catch {
 			console.error(error);
 			this.websocket.close(ResetConnection.code, ResetConnection.reason);
 		}

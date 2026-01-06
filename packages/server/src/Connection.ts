@@ -27,14 +27,14 @@ export class Connection {
 
 	callbacks = {
 		onClose: [(_document: Document, _event?: CloseEvent) => {}],
-		beforeHandleMessage: (connection: Connection, update: Uint8Array) =>
+		beforeHandleMessage: (_connection: Connection, _update: Uint8Array) =>
 			Promise.resolve(),
 		beforeSync: (
-			connection: Connection,
-			payload: Pick<beforeSyncPayload, "type" | "payload">,
+			_connection: Connection,
+			_payload: Pick<beforeSyncPayload, "type" | "payload">,
 		) => Promise.resolve(),
-		statelessCallback: (payload: onStatelessPayload) => Promise.resolve(),
-		onTokenSyncCallback: (payload: Partial<onTokenSyncPayload>) =>
+		statelessCallback: (_payload: onStatelessPayload) => Promise.resolve(),
+		onTokenSyncCallback: (_payload: Partial<onTokenSyncPayload>) =>
 			Promise.resolve(),
 	};
 
@@ -140,7 +140,7 @@ export class Connection {
 			this.webSocket.send(message, (error: Error | undefined) => {
 				if (error != null) this.close();
 			});
-		} catch (exception) {
+		} catch {
 			this.close();
 		}
 	}
