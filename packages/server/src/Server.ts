@@ -197,7 +197,7 @@ export class Server {
 		}) as AddressInfo;
 	}
 
-	async destroy(): Promise<any> {
+	async destroy(): Promise<void> {
 		await new Promise(async (resolve) => {
 			this.httpServer.close();
 

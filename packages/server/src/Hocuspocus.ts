@@ -194,7 +194,7 @@ export class Hocuspocus {
 	handleConnection(
 		incoming: WebSocket,
 		request: IncomingMessage,
-		defaultContext: any = {},
+		defaultContext: HookContext = {},
 	): void {
 		const clientConnection = new ClientConnection(
 			incoming,
@@ -287,7 +287,7 @@ export class Hocuspocus {
 		request: Partial<Pick<IncomingMessage, "headers" | "url">>,
 		socketId: string,
 		connection: ConnectionConfiguration,
-		context?: any,
+		context?: HookContext,
 	): Promise<Document> {
 		const existingLoadingDoc = this.loadingDocuments.get(documentName);
 
@@ -326,7 +326,7 @@ export class Hocuspocus {
 		request: Partial<Pick<IncomingMessage, "headers" | "url">>,
 		socketId: string,
 		connectionConfig: ConnectionConfiguration,
-		context?: any,
+		context?: HookContext,
 	): Promise<Document> {
 		const requestHeaders = request.headers ?? {};
 		const requestParameters = getParameters(request);
@@ -434,7 +434,7 @@ export class Hocuspocus {
 						await this.hooks("onStoreDocument", hookPayload);
 						await this.hooks("afterStoreDocument", hookPayload);
 					});
-				} catch (error: any) {
+				} catch (error: unknown) {
 					console.error("Caught error during storeDocumentHooks", error);
 					if (error?.message) {
 						throw error;
@@ -461,7 +461,7 @@ export class Hocuspocus {
 		name: T,
 		payload: HookPayloadByName[T],
 		callback: Function | null = null,
-	): Promise<any> {
+	): Promise<void> {
 		const { extensions } = this.configuration;
 
 		// create a new `thenable` chain
@@ -474,7 +474,7 @@ export class Hocuspocus {
 			// run through all the configured hooks
 			.forEach((extension) => {
 				chain = chain
-					.then(() => (extension[name] as any)?.(payload))
+					.then(() => (extension[name] as (payload: HookPayloadByName[T]) => Promise<void>)?.(payload))
 					.catch((error) => {
 						// make sure to log error messages
 						if (error?.message) {
@@ -485,7 +485,7 @@ export class Hocuspocus {
 					});
 
 				if (callback) {
-					chain = chain.then((...args: any[]) => callback(...args));
+					chain = chain.then((...args: unknown[]) => callback(...args));
 				}
 			});
 
@@ -501,7 +501,7 @@ export class Hocuspocus {
 		return hasPendingWork === false && document.getConnectionsCount() === 0;
 	}
 
-	async unloadDocument(document: Document): Promise<any> {
+	async unloadDocument(document: Document): Promise<void> {
 		const documentName = document.name;
 
 		if (!this.shouldUnloadDocument(document)) return;
@@ -542,7 +542,7 @@ export class Hocuspocus {
 
 	async openDirectConnection(
 		documentName: string,
-		context?: any,
+		context?: HookContext,
 	): Promise<DirectConnection> {
 		const connectionConfig: ConnectionConfiguration = {
 			isAuthenticated: true,
