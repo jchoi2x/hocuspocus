@@ -45,7 +45,7 @@ export class OutgoingMessage {
 
 	createAwarenessUpdateMessage(
 		awareness: Awareness,
-		changedClients?: Array<any>,
+		changedClients?: number[],
 	): OutgoingMessage {
 		this.type = MessageType.Awareness;
 		this.category = "Update";

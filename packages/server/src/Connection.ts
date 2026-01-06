@@ -1,4 +1,3 @@
-import type { IncomingMessage as HTTPIncomingMessage } from "node:http";
 import {
 	type CloseEvent,
 	ResetConnection,
@@ -10,6 +9,8 @@ import { IncomingMessage } from "./IncomingMessage.ts";
 import { MessageReceiver } from "./MessageReceiver.ts";
 import { OutgoingMessage } from "./OutgoingMessage.ts";
 import type {
+	HookContext,
+	IncomingMessage as HTTPIncomingMessage,
 	beforeSyncPayload,
 	onStatelessPayload,
 	onTokenSyncPayload,
@@ -18,22 +19,22 @@ import type {
 export class Connection {
 	webSocket: WebSocket;
 
-	context: any;
+	context: HookContext;
 
 	document: Document;
 
 	request: HTTPIncomingMessage;
 
 	callbacks = {
-		onClose: [(document: Document, event?: CloseEvent) => {}],
-		beforeHandleMessage: (connection: Connection, update: Uint8Array) =>
+		onClose: [(_document: Document, _event?: CloseEvent) => {}],
+		beforeHandleMessage: (_connection: Connection, _update: Uint8Array) =>
 			Promise.resolve(),
 		beforeSync: (
-			connection: Connection,
-			payload: Pick<beforeSyncPayload, "type" | "payload">,
+			_connection: Connection,
+			_payload: Pick<beforeSyncPayload, "type" | "payload">,
 		) => Promise.resolve(),
-		statelessCallback: (payload: onStatelessPayload) => Promise.resolve(),
-		onTokenSyncCallback: (payload: Partial<onTokenSyncPayload>) =>
+		statelessCallback: (_payload: onStatelessPayload) => Promise.resolve(),
+		onTokenSyncCallback: (_payload: Partial<onTokenSyncPayload>) =>
 			Promise.resolve(),
 	};
 
@@ -49,7 +50,7 @@ export class Connection {
 		request: HTTPIncomingMessage,
 		document: Document,
 		socketId: string,
-		context: any,
+		context: HookContext,
 		readOnly = false,
 	) {
 		this.webSocket = connection;
@@ -91,7 +92,7 @@ export class Connection {
 	 * Set a callback that will be triggered before an message is handled
 	 */
 	beforeHandleMessage(
-		callback: (connection: Connection, update: Uint8Array) => Promise<any>,
+		callback: (connection: Connection, update: Uint8Array) => Promise<void>,
 	): Connection {
 		this.callbacks.beforeHandleMessage = callback;
 
@@ -105,7 +106,7 @@ export class Connection {
 		callback: (
 			connection: Connection,
 			payload: Pick<beforeSyncPayload, "type" | "payload">,
-		) => Promise<any>,
+		) => Promise<void>,
 	): Connection {
 		this.callbacks.beforeSync = callback;
 
@@ -116,7 +117,7 @@ export class Connection {
 	 * Set a callback that will be triggered when on token sync message is received
 	 */
 	onTokenSyncCallback(
-		callback: (payload: onTokenSyncPayload) => Promise<void>,
+		callback: (payload: Partial<onTokenSyncPayload>) => Promise<void>,
 	): Connection {
 		this.callbacks.onTokenSyncCallback = callback;
 
@@ -126,7 +127,7 @@ export class Connection {
 	/**
 	 * Send the given message
 	 */
-	send(message: any): void {
+	send(message: Uint8Array | ArrayBuffer | string): void {
 		if (
 			this.webSocket.readyState === WsReadyStates.Closing ||
 			this.webSocket.readyState === WsReadyStates.Closed
@@ -136,10 +137,10 @@ export class Connection {
 		}
 
 		try {
-			this.webSocket.send(message, (error: any) => {
+			this.webSocket.send(message, (error: Error | undefined) => {
 				if (error != null) this.close();
 			});
-		} catch (exception) {
+		} catch {
 			this.close();
 		}
 	}
@@ -173,7 +174,7 @@ export class Connection {
 		if (this.document.hasConnection(this)) {
 			this.document.removeConnection(this);
 			this.callbacks.onClose.forEach(
-				(callback: (arg0: Document, arg1?: CloseEvent) => any) =>
+				(callback: (arg0: Document, arg1?: CloseEvent) => void) =>
 					callback(this.document, event),
 			);
 
@@ -218,25 +219,27 @@ export class Connection {
 			.then(() => {
 				try {
 					new MessageReceiver(message).apply(this.document, this);
-				} catch (e: any) {
+				} catch (e: unknown) {
+					const error = e as { code?: number; reason?: string };
 					console.error(
 						`closing connection ${this.socketId} (while handling ${documentName}) because of exception`,
 						e,
 					);
 					this.close({
-						code: "code" in e ? e.code : ResetConnection.code,
-						reason: "reason" in e ? e.reason : ResetConnection.reason,
+						code: error.code ?? ResetConnection.code,
+						reason: error.reason ?? ResetConnection.reason,
 					});
 				}
 			})
-			.catch((e: any) => {
+			.catch((e: unknown) => {
+				const error = e as { code?: number; reason?: string };
 				console.error(
 					`closing connection ${this.socketId} (while handling ${documentName}) because of exception`,
 					e,
 				);
 				this.close({
-					code: "code" in e ? e.code : ResetConnection.code,
-					reason: "reason" in e ? e.reason : ResetConnection.reason,
+					code: error.code ?? ResetConnection.code,
+					reason: error.reason ?? ResetConnection.reason,
 				});
 			});
 	}

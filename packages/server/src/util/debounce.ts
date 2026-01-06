@@ -5,16 +5,16 @@ export const useDebounce = () => {
 			timeout: NodeJS.Timeout;
 			start: number;
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-			func: () => any | Promise<() => any>;
+			func: () => unknown | Promise<() => unknown>;
 		}
 	> = new Map();
 
-	const runningExecutions: Map<string, Promise<any>> = new Map();
+	const runningExecutions: Map<string, Promise<unknown>> = new Map();
 
 	const debounce = async (
 		id: string,
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-		func: () => any | Promise<() => any>,
+		func: () => unknown | Promise<() => unknown>,
 		debounce: number,
 		maxDebounce: number,
 	) => {

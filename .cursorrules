@@ -1,0 +1,129 @@
+# Hocuspocus Cursor Rules
+
+## Testing Conventions
+
+### Test Organization
+- Place test files in `__tests__` directories next to the code they test
+- Use the naming convention: `<filename-no-extension>.spec.ts`
+- Example: For `packages/server/src/Hocuspocus.ts`, create `packages/server/src/__tests__/Hocuspocus.spec.ts`
+
+### Test Framework
+- Use Vitest as the test runner
+- Import test utilities from `vitest`:
+  ```typescript
+  import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+  ```
+
+### Test Structure
+- Use `describe` blocks to group related tests
+- Use descriptive test names that explain what is being tested
+- Follow the Arrange-Act-Assert pattern:
+  ```typescript
+  describe('MyClass', () => {
+    it('should do something specific', () => {
+      // Arrange: Set up test data and dependencies
+      const input = 'test';
+      
+      // Act: Execute the code being tested
+      const result = myFunction(input);
+      
+      // Assert: Verify the expected outcome
+      expect(result).toBe('expected');
+    });
+  });
+  ```
+
+### Mocking
+- Use `vi.fn()` for mock functions
+- Use `vi.mock()` for module mocking
+- Use `vi.spyOn()` for spying on existing methods
+- Clean up mocks in `afterEach` hooks
+
+### Async Testing
+- Use `async/await` for asynchronous tests
+- Always await promises in tests
+- Use `waitFor` utilities when testing async behavior
+
+### Coverage
+- Aim for high test coverage
+- Focus on testing public APIs and critical paths
+- Don't test trivial code (getters, setters, simple formatters)
+- Test edge cases and error conditions
+
+## Type Safety
+
+### Strict Type Checking
+- **Never use `any` type** - it defeats the purpose of TypeScript
+- Use specific types or generics instead of `any`
+- If the type is truly unknown, use `unknown` and narrow it with type guards
+- Use `Record<string, SomeType>` for objects with dynamic keys
+- Use union types (`string | number`) instead of `any`
+
+### Type Inference
+- Let TypeScript infer types when possible
+- Add explicit types for:
+  - Function parameters
+  - Public API return types
+  - Complex types that benefit from clarity
+
+### Type Guards
+- Use type guards to narrow `unknown` types:
+  ```typescript
+  function isString(value: unknown): value is string {
+    return typeof value === 'string';
+  }
+  ```
+
+### Generic Types
+- Use generics for reusable, type-safe code:
+  ```typescript
+  function identity<T>(value: T): T {
+    return value;
+  }
+  ```
+
+### Utility Types
+- Use TypeScript utility types:
+  - `Partial<T>` - Make all properties optional
+  - `Required<T>` - Make all properties required
+  - `Pick<T, K>` - Pick specific properties
+  - `Omit<T, K>` - Omit specific properties
+  - `Record<K, T>` - Object type with specific key/value types
+
+## Code Quality
+
+### Linting
+- Run `npm run lint` before committing
+- Fix all linting errors before submitting PR
+- Use `npm run lint:fix` for auto-fixable issues
+
+### Best Practices
+- Write self-documenting code with clear variable and function names
+- Keep functions small and focused on a single responsibility
+- Use early returns to reduce nesting
+- Prefer const over let, never use var
+- Use optional chaining (`?.`) and nullish coalescing (`??`) operators
+- Avoid deep nesting - extract complex logic into separate functions
+
+### Comments
+- Write comments for complex algorithms or non-obvious code
+- Don't comment obvious code
+- Use JSDoc for public APIs
+- Keep comments up-to-date with code changes
+
+## Git Workflow
+
+### Commits
+- Write clear, descriptive commit messages
+- Use conventional commit format when possible:
+  - `feat:` for new features
+  - `fix:` for bug fixes
+  - `refactor:` for code refactoring
+  - `test:` for test changes
+  - `docs:` for documentation changes
+
+### Pull Requests
+- Include tests for new features and bug fixes
+- Ensure all tests pass before submitting
+- Include a clear description of changes
+- Link to related issues

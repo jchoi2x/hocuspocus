@@ -1,5 +1,3 @@
-import crypto from "node:crypto";
-import type { IncomingMessage } from "node:http";
 import { ResetConnection, awarenessStatesToArray } from "@hocuspocus/common";
 import type WebSocket from "ws";
 import type { Doc } from "yjs";
@@ -14,8 +12,10 @@ import type {
 	AwarenessUpdate,
 	Configuration,
 	ConnectionConfiguration,
+	HookContext,
 	HookName,
 	HookPayloadByName,
+	IncomingMessage,
 	beforeBroadcastStatelessPayload,
 	onChangePayload,
 	onDisconnectPayload,
@@ -23,6 +23,7 @@ import type {
 } from "./types.ts";
 import { useDebounce } from "./util/debounce.ts";
 import { getParameters } from "./util/getParameters.ts";
+import { uuid } from "./util/uuid.ts";
 
 export const defaultConfiguration = {
 	name: null,
@@ -41,24 +42,24 @@ export class Hocuspocus {
 	configuration: Configuration = {
 		...defaultConfiguration,
 		extensions: [],
-		onConfigure: () => new Promise((r) => r(null)),
-		onListen: () => new Promise((r) => r(null)),
-		onUpgrade: () => new Promise((r) => r(null)),
-		onConnect: () => new Promise((r) => r(null)),
-		connected: () => new Promise((r) => r(null)),
-		beforeHandleMessage: () => new Promise((r) => r(null)),
-		beforeSync: () => new Promise((r) => r(null)),
-		beforeBroadcastStateless: () => new Promise((r) => r(null)),
-		onStateless: () => new Promise((r) => r(null)),
-		onChange: () => new Promise((r) => r(null)),
-		onCreateDocument: () => new Promise((r) => r(null)),
-		onLoadDocument: () => new Promise((r) => r(null)),
-		onStoreDocument: () => new Promise((r) => r(null)),
-		afterStoreDocument: () => new Promise((r) => r(null)),
-		onAwarenessUpdate: () => new Promise((r) => r(null)),
-		onRequest: () => new Promise((r) => r(null)),
-		onDisconnect: () => new Promise((r) => r(null)),
-		onDestroy: () => new Promise((r) => r(null)),
+		onConfigure: () => new Promise((r) => r()),
+		onListen: () => new Promise((r) => r()),
+		onUpgrade: () => new Promise((r) => r()),
+		onConnect: () => new Promise((r) => r()),
+		connected: () => new Promise((r) => r()),
+		beforeHandleMessage: () => new Promise((r) => r()),
+		beforeSync: () => new Promise((r) => r()),
+		beforeBroadcastStateless: () => new Promise((r) => r()),
+		onStateless: () => new Promise((r) => r()),
+		onChange: () => new Promise((r) => r()),
+		onCreateDocument: () => new Promise((r) => r()),
+		onLoadDocument: () => new Promise((r) => r()),
+		onStoreDocument: () => new Promise((r) => r()),
+		afterStoreDocument: () => new Promise((r) => r()),
+		onAwarenessUpdate: () => new Promise((r) => r()),
+		onRequest: () => new Promise((r) => r()),
+		onDisconnect: () => new Promise((r) => r()),
+		onDestroy: () => new Promise((r) => r()),
 	};
 
 	loadingDocuments: Map<string, Promise<Document>> = new Map();
@@ -193,7 +194,7 @@ export class Hocuspocus {
 	handleConnection(
 		incoming: WebSocket,
 		request: IncomingMessage,
-		defaultContext: any = {},
+		defaultContext: HookContext = {},
 	): void {
 		const clientConnection = new ClientConnection(
 			incoming,
@@ -286,7 +287,7 @@ export class Hocuspocus {
 		request: Partial<Pick<IncomingMessage, "headers" | "url">>,
 		socketId: string,
 		connection: ConnectionConfiguration,
-		context?: any,
+		context?: HookContext,
 	): Promise<Document> {
 		const existingLoadingDoc = this.loadingDocuments.get(documentName);
 
@@ -325,7 +326,7 @@ export class Hocuspocus {
 		request: Partial<Pick<IncomingMessage, "headers" | "url">>,
 		socketId: string,
 		connectionConfig: ConnectionConfiguration,
-		context?: any,
+		context?: HookContext,
 	): Promise<Document> {
 		const requestHeaders = request.headers ?? {};
 		const requestParameters = getParameters(request);
@@ -433,7 +434,7 @@ export class Hocuspocus {
 						await this.hooks("onStoreDocument", hookPayload);
 						await this.hooks("afterStoreDocument", hookPayload);
 					});
-				} catch (error: any) {
+				} catch (error: unknown) {
 					console.error("Caught error during storeDocumentHooks", error);
 					if (error?.message) {
 						throw error;
@@ -460,7 +461,7 @@ export class Hocuspocus {
 		name: T,
 		payload: HookPayloadByName[T],
 		callback: Function | null = null,
-	): Promise<any> {
+	): Promise<void> {
 		const { extensions } = this.configuration;
 
 		// create a new `thenable` chain
@@ -473,7 +474,7 @@ export class Hocuspocus {
 			// run through all the configured hooks
 			.forEach((extension) => {
 				chain = chain
-					.then(() => (extension[name] as any)?.(payload))
+					.then(() => (extension[name] as (payload: HookPayloadByName[T]) => Promise<void>)?.(payload))
 					.catch((error) => {
 						// make sure to log error messages
 						if (error?.message) {
@@ -484,7 +485,7 @@ export class Hocuspocus {
 					});
 
 				if (callback) {
-					chain = chain.then((...args: any[]) => callback(...args));
+					chain = chain.then((...args: unknown[]) => callback(...args));
 				}
 			});
 
@@ -500,7 +501,7 @@ export class Hocuspocus {
 		return hasPendingWork === false && document.getConnectionsCount() === 0;
 	}
 
-	async unloadDocument(document: Document): Promise<any> {
+	async unloadDocument(document: Document): Promise<void> {
 		const documentName = document.name;
 
 		if (!this.shouldUnloadDocument(document)) return;
@@ -541,7 +542,7 @@ export class Hocuspocus {
 
 	async openDirectConnection(
 		documentName: string,
-		context?: any,
+		context?: HookContext,
 	): Promise<DirectConnection> {
 		const connectionConfig: ConnectionConfiguration = {
 			isAuthenticated: true,
@@ -551,7 +552,7 @@ export class Hocuspocus {
 		const document: Document = await this.createDocument(
 			documentName,
 			{}, // direct connection has no request params
-			crypto.randomUUID(),
+			uuid(),
 			connectionConfig,
 			context,
 		);

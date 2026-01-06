@@ -136,7 +136,7 @@ export class Server {
 		}
 	};
 
-	async listen(port?: number, callback: any = null): Promise<Hocuspocus> {
+	async listen(port?: number, callback?: () => Promise<void>): Promise<Hocuspocus> {
 		if (port) {
 			this.configuration.port = port;
 		}
@@ -197,7 +197,7 @@ export class Server {
 		}) as AddressInfo;
 	}
 
-	async destroy(): Promise<any> {
+	async destroy(): Promise<void> {
 		await new Promise(async (resolve) => {
 			this.httpServer.close();
 

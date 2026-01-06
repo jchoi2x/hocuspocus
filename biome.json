@@ -7,7 +7,17 @@
   "linter": {
     "rules": {
       "suspicious": {
-        "noAsyncPromiseExecutor": "off"
+        "noAsyncPromiseExecutor": "off",
+        "noConfusingVoidType": "off",
+        "noExportsInTest": "off"
+      },
+      "complexity": {
+        "noForEach": "off",
+        "noBannedTypes": "off"
+      },
+      "style": {
+        "noParameterAssign": "off",
+        "noNonNullAssertion": "off"
       }
     }
   }

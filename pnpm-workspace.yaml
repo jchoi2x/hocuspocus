@@ -1,0 +1,6 @@
+ignoredBuiltDependencies:
+  - nx
+
+onlyBuiltDependencies:
+  - '@biomejs/biome'
+  - esbuild

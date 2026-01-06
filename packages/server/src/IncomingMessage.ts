@@ -28,7 +28,7 @@ export class IncomingMessage {
 	 */
 	private encoderInternal?: Encoder;
 
-	constructor(input: any) {
+	constructor(input: Uint8Array | ArrayBuffer | Buffer) {
 		if (!(input instanceof Uint8Array)) {
 			input = new Uint8Array(input);
 		}
