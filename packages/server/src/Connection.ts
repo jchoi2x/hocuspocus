@@ -26,7 +26,7 @@ export class Connection {
 	request: HTTPIncomingMessage;
 
 	callbacks = {
-		onClose: [(document: Document, event?: CloseEvent) => {}],
+		onClose: [(_document: Document, _event?: CloseEvent) => {}],
 		beforeHandleMessage: (connection: Connection, update: Uint8Array) =>
 			Promise.resolve(),
 		beforeSync: (
@@ -92,7 +92,7 @@ export class Connection {
 	 * Set a callback that will be triggered before an message is handled
 	 */
 	beforeHandleMessage(
-		callback: (connection: Connection, update: Uint8Array) => Promise<any>,
+		callback: (connection: Connection, update: Uint8Array) => Promise<void>,
 	): Connection {
 		this.callbacks.beforeHandleMessage = callback;
 
@@ -106,7 +106,7 @@ export class Connection {
 		callback: (
 			connection: Connection,
 			payload: Pick<beforeSyncPayload, "type" | "payload">,
-		) => Promise<any>,
+		) => Promise<void>,
 	): Connection {
 		this.callbacks.beforeSync = callback;
 
@@ -174,7 +174,7 @@ export class Connection {
 		if (this.document.hasConnection(this)) {
 			this.document.removeConnection(this);
 			this.callbacks.onClose.forEach(
-				(callback: (arg0: Document, arg1?: CloseEvent) => any) =>
+				(callback: (arg0: Document, arg1?: CloseEvent) => void) =>
 					callback(this.document, event),
 			);
 
